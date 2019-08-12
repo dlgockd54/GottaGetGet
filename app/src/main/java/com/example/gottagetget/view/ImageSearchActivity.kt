@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gottagetget.R
@@ -72,25 +74,38 @@ class ImageSearchActivity : AppCompatActivity() {
         })
     }
 
-    private fun pullSearchedImageList(query: String) {
+    private fun pullSearchedImageList(query: String, page: Int = 1) {
         mCompositeDisposable.add(
-            getSearchedImageListSingle(query)
+            getSearchedImageListSingle(query, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object: DisposableSingleObserver<List<ImageItem>>() {
                     override fun onSuccess(t: List<ImageItem>) {
+                        with(mImageAdapter) {
+                            if(t.isNotEmpty()) {
+                                mSearchedImageList.clear()
+                                mSearchedImageList.addAll(t)
+                                notifyDataSetChanged()
 
+                                tv_empty_search_result.visibility = View.GONE
+                                rv_image_list.visibility = View.VISIBLE
+                            } else {
+                                rv_image_list.visibility = View.GONE
+                                tv_empty_search_result.visibility = View.VISIBLE
+                            }
+                        }
                     }
 
                     override fun onError(e: Throwable) {
-
+                        Toast.makeText(this@ImageSearchActivity, getString(R.string.error_search), Toast.LENGTH_SHORT)
+                            .show()
                     }
                 })
         )
     }
 
-    private fun getSearchedImageListSingle(query: String) : Single<List<ImageItem>> =
-        mImageSearchViewModel.getSearchedImageListSingle(query)
+    private fun getSearchedImageListSingle(query: String, page: Int) : Single<List<ImageItem>> =
+        mImageSearchViewModel.getSearchedImageListSingle(query, page)
 
     override fun onDestroy() {
         mCompositeDisposable.clear()
