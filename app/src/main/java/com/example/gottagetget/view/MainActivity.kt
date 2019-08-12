@@ -1,7 +1,8 @@
-package com.example.gottagetget
+package com.example.gottagetget.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.gottagetget.R
 
 class MainActivity : AppCompatActivity() {
 
