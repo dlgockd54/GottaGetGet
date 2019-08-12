@@ -75,6 +75,8 @@ class ImageSearchActivity : AppCompatActivity() {
     }
 
     private fun pullSearchedImageList(query: String, page: Int = 1) {
+        progress_bar_image_loading.visibility = View.VISIBLE
+
         mCompositeDisposable.add(
             getSearchedImageListSingle(query, page)
                 .subscribeOn(Schedulers.io())
@@ -93,12 +95,16 @@ class ImageSearchActivity : AppCompatActivity() {
                                 rv_image_list.visibility = View.GONE
                                 tv_empty_search_result.visibility = View.VISIBLE
                             }
+
+                            progress_bar_image_loading.visibility = View.GONE
                         }
                     }
 
                     override fun onError(e: Throwable) {
                         Toast.makeText(this@ImageSearchActivity, getString(R.string.error_search), Toast.LENGTH_SHORT)
                             .show()
+
+                        progress_bar_image_loading.visibility = View.GONE
                     }
                 })
         )
