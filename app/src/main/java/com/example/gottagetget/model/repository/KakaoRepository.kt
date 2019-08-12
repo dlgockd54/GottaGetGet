@@ -10,8 +10,8 @@ import io.reactivex.schedulers.Schedulers
  */
 
 object KakaoRepository {
-    fun getSearchImageListSingle(query: String, page: Int): Single<List<ImageItem>> =
-        ApiManager.kakaoApi.getSearchedImageListSingle(query, page)
+    fun getSearchImageListSingle(query: String, page: Int, size: Int): Single<List<ImageItem>> =
+        ApiManager.kakaoApi.getSearchedImageListSingle(query, page, size)
             .map {
                 it.asJsonObject.getAsJsonArray("documents")
                     .map {

@@ -10,8 +10,8 @@ import io.reactivex.Single
  */
 
 class ImageSearchViewModel : ViewModel() {
-    fun getSearchedImageListSingle(query:  String, page: Int): Single<List<ImageItem>> =
-        KakaoRepository.getSearchImageListSingle(query, page)
+    fun getSearchedImageListSingle(query:  String, page: Int, size: Int): Single<List<ImageItem>> =
+        KakaoRepository.getSearchImageListSingle(query, page, size)
 
     override fun onCleared() {
 

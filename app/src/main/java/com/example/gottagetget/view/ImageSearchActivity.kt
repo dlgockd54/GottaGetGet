@@ -74,11 +74,11 @@ class ImageSearchActivity : AppCompatActivity() {
         })
     }
 
-    private fun pullSearchedImageList(query: String, page: Int = 1) {
+    private fun pullSearchedImageList(query: String, page: Int = 1, size: Int = 10) {
         progress_bar_image_loading.visibility = View.VISIBLE
 
         mCompositeDisposable.add(
-            getSearchedImageListSingle(query, page)
+            getSearchedImageListSingle(query, page, size)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object: DisposableSingleObserver<List<ImageItem>>() {
@@ -110,8 +110,8 @@ class ImageSearchActivity : AppCompatActivity() {
         )
     }
 
-    private fun getSearchedImageListSingle(query: String, page: Int) : Single<List<ImageItem>> =
-        mImageSearchViewModel.getSearchedImageListSingle(query, page)
+    private fun getSearchedImageListSingle(query: String, page: Int, size: Int) : Single<List<ImageItem>> =
+        mImageSearchViewModel.getSearchedImageListSingle(query, page, size)
 
     override fun onDestroy() {
         mCompositeDisposable.clear()

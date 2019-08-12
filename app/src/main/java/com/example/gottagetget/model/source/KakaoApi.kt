@@ -13,6 +13,7 @@ interface KakaoApi {
     @GET("v2/search/image")
     fun getSearchedImageListSingle(
         @Query("query") query: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
+        @Query("size") size: Int
     ): Single<JsonElement>
 }
