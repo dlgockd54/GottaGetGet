@@ -10,3 +10,14 @@ data class ImageItem(
     val thumbnail_url: String,
     val width: Int
 )
+
+data class Meta(
+    val is_end: Boolean,
+    val pageable_count: Int,
+    val total_count: Int
+)
+
+data class SearchResponse(
+    val documents: List<ImageItem>,
+    val meta: Meta
+)

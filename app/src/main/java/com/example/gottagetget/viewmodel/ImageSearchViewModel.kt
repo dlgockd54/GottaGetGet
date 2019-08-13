@@ -1,7 +1,7 @@
 package com.example.gottagetget.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.gottagetget.model.ImageItem
+import com.example.gottagetget.model.SearchResponse
 import com.example.gottagetget.model.repository.KakaoRepository
 import io.reactivex.Single
 
@@ -10,7 +10,7 @@ import io.reactivex.Single
  */
 
 class ImageSearchViewModel : ViewModel() {
-    fun getSearchedImageListSingle(query:  String, page: Int, size: Int): Single<List<ImageItem>> =
+    fun getSearchedImageListSingle(query:  String, page: Int, size: Int): Single<SearchResponse> =
         KakaoRepository.getSearchImageListSingle(query, page, size)
 
     override fun onCleared() {

@@ -1,6 +1,6 @@
 package com.example.gottagetget.model.source
 
-import com.google.gson.JsonElement
+import com.example.gottagetget.model.SearchResponse
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -15,5 +15,5 @@ interface KakaoApi {
         @Query("query") query: String,
         @Query("page") page: Int,
         @Query("size") size: Int
-    ): Single<JsonElement>
+    ): Single<SearchResponse>
 }

@@ -8,8 +8,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.gottagetget.R
 import com.example.gottagetget.model.ImageItem
+import com.example.gottagetget.model.SearchResponse
 import com.example.gottagetget.view.adapter.ImageAdapter
 import com.example.gottagetget.viewmodel.ImageSearchViewModel
 import io.reactivex.Single
@@ -31,6 +33,8 @@ class ImageSearchActivity : AppCompatActivity() {
     private lateinit var mImageSearchViewModel: ImageSearchViewModel
     private val mCompositeDisposable: CompositeDisposable = CompositeDisposable()
     private val mTextChangeSubject: PublishSubject<String> = PublishSubject.create()
+    private var mIsEndPage: Boolean = false
+    private var mCurrentPage: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +50,19 @@ class ImageSearchActivity : AppCompatActivity() {
         rv_image_list.apply {
             adapter = mImageAdapter
             layoutManager = LinearLayoutManager(this@ImageSearchActivity)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    when (newState) {
+                        RecyclerView.SCROLL_STATE_SETTLING -> {
+                            if (!rv_image_list.canScrollVertically(-1)) {
+                                loadPreviousPage()
+                            } else if (!rv_image_list.canScrollVertically(1)) {
+                                loadNextPage()
+                            }
+                        }
+                    }
+                }
+            })
         }
 
         mCompositeDisposable.add(
@@ -55,7 +72,9 @@ class ImageSearchActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object: DisposableObserver<String>() {
                     override fun onNext(t: String) {
-                        pullSearchedImageList(t)
+                        mCurrentPage = 1
+
+                        pullSearchedImageList(t, mCurrentPage)
                     }
 
                     override fun onError(e: Throwable) { }
@@ -74,23 +93,50 @@ class ImageSearchActivity : AppCompatActivity() {
         })
     }
 
+    private fun loadPreviousPage() {
+        if(mCurrentPage > 1) {
+            loadPage(mCurrentPage - 1)
+        } else {
+            Toast.makeText(this@ImageSearchActivity, getString(R.string.msg_first_page), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loadNextPage() {
+        if(mIsEndPage) {
+            Toast.makeText(this@ImageSearchActivity, getString(R.string.msg_last_page), Toast.LENGTH_SHORT).show()
+        } else {
+            loadPage(mCurrentPage + 1)
+        }
+    }
+
+    private fun loadPage(page: Int) {
+        pullSearchedImageList(edittext_image_search.text.toString(), page)
+    }
+
     private fun pullSearchedImageList(query: String, page: Int = 1, size: Int = 10) {
         progress_bar_image_loading.visibility = View.VISIBLE
 
         mCompositeDisposable.add(
             getSearchedImageListSingle(query, page, size)
+                .map {
+                    mIsEndPage = it.meta.is_end
+                    it.documents
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object: DisposableSingleObserver<List<ImageItem>>() {
+                .subscribeWith(object : DisposableSingleObserver<List<ImageItem>>() {
                     override fun onSuccess(t: List<ImageItem>) {
                         with(mImageAdapter) {
-                            if(t.isNotEmpty()) {
+                            if (t.isNotEmpty()) {
                                 mSearchedImageList.clear()
                                 mSearchedImageList.addAll(t)
                                 notifyDataSetChanged()
 
                                 tv_empty_search_result.visibility = View.GONE
                                 rv_image_list.visibility = View.VISIBLE
+                                mCurrentPage = page
+
+                                Toast.makeText(this@ImageSearchActivity, "$mCurrentPage 페이지", Toast.LENGTH_SHORT).show()
                             } else {
                                 rv_image_list.visibility = View.GONE
                                 tv_empty_search_result.visibility = View.VISIBLE
@@ -110,7 +156,7 @@ class ImageSearchActivity : AppCompatActivity() {
         )
     }
 
-    private fun getSearchedImageListSingle(query: String, page: Int, size: Int) : Single<List<ImageItem>> =
+    private fun getSearchedImageListSingle(query: String, page: Int, size: Int): Single<SearchResponse> =
         mImageSearchViewModel.getSearchedImageListSingle(query, page, size)
 
     override fun onDestroy() {

@@ -3,4 +3,6 @@
     <string name="image_search_hint">검색어를 입력하세요</string>
     <string name="empty_search_result">검색 결과가 없습니다</string>
     <string name="error_search">검색 중 에러가 발생했습니다</string>
+    <string name="msg_first_page">첫 번째 페이지 입니다</string>
+    <string name="msg_last_page">마지막 페이지 입니다</string>
 </resources>
